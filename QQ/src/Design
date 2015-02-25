@@ -1,0 +1,18 @@
+QQ与服务器建立连接
+QQ发送用户名、密码、状态（RSA加密，QQ号为公钥）
+服务器验证成功，返回所有好友信息（QQ号、状态、IP地址），同时更新此QQ的状态信息 OR 返回登陆失败消息（记录）
+用户之间相互通信，P2P，以对方QQ号码为密钥加密消息
+聊天记录本地文件，QQ号公钥加密
+
+服务器监听：登陆请求，变更状态请求；一旦状态改变，便向所有登陆好友发送更新状态消息；申请QQ号、查找QQ号、添加好友、删除好友
+客户端监听：服务器端发送的好友状态消息，其他QQ好友的聊天消息，统一交付给消息处理中心； 
+
+QQ类设计：
+	属性：name(String)姓名、number(int)QQ号码、status(0在线、1隐身、2离线)状态、friends（String,int,int,IP）(姓名，QQ，状态，IP地址)好友
+	方法：infIn(String)接受消息、infOut(String)发送消息、InfCenter(String)处理消息
+		  changeStatus(int,int)变更状态-》{login(int)登陆、quit(int)注销}
+		  add(int)添加好友、delete(int)删除好友
+Server类设计：
+	接受/拒绝登陆请求，接受/发送/写入数据库 状态更新信息，接受查找，变更关系请求，分发、回收QQ
+数据库设计：
+	QQ(int)、状态(int)、IP(ip)、姓名（string）、好友（int[]）
