@@ -26,3 +26,7 @@ Msg类设计：
 				 添加好友=4，消息体：QQ
 				 删除好友=5，消息体：QQ
 				 
+QQ类中，main方法和infoOut方法如何合作完成socket编程；多线程、长连接、使用流发送类
+UI设计、服务器设计、加密
+数据库设计：
+	QQ（int(10)），name（varchar(50)），status（varchar[3]），IP（varchar[15]），friends（varchar[5500]）
