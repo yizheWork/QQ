@@ -3,21 +3,24 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.*;
 
 public class UILogin extends JFrame{
 	Font f =new Font("宋体",Font.PLAIN,12);//字体
+	
 	public UILogin(){
 	setTitle("登录");
    setSize(400,280);
    this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
    this.setVisible(true);
-	JTextField numJTF = new JTextField(10);
-	JPasswordField passJPF = new JPasswordField(50);
+	final JTextField numJTF = new JTextField(10);
+	final JPasswordField passJPF = new JPasswordField(50);
 	JButton loginJB = new JButton("登陆");
-	String[] status = new String[]{"在线","隐身","离线"};
-   JComboBox staJCB = new JComboBox(status);
+	String[] status = new String[]{"在线","隐身"};
+   final JComboBox staJCB = new JComboBox(status);
    JLabel blankJL1 = new JLabel();
    JLabel blankJL2 = new JLabel();
    JLabel blankJL3 = new JLabel();
@@ -94,10 +97,28 @@ public class UILogin extends JFrame{
    s.gridwidth=1;
    layout.setConstraints(blankJL10, s);
    
+   loginJB.addActionListener(new ActionListener(){
+	public void actionPerformed(ActionEvent arg0) {
+		String sta = null;
+		if(staJCB.getSelectedIndex()==0)
+			sta="on";
+		else if(staJCB.getSelectedIndex()==1)
+			sta = "hi";
+		//System.out.println(Integer.parseInt(numJTF.getText())+sta+passJPF.getPassword());
+		QQ.infOut(new Msg(Integer.parseInt(numJTF.getText()),0,0,sta+passJPF.getText()));
 	}
-	public static void main(String[] args){
+	   
+   }
+  );
+   
+	}
+	/**public static void main(String[] args){
 		UILogin uil = new UILogin();
 		uil.setVisible(true);
 		//ui.show();
+	}**/
+	public void close() {
+		// TODO Auto-generated method stub
+		this.dispose();
 	}
 }

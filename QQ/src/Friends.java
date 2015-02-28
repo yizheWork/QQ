@@ -6,6 +6,7 @@ public class Friends {
 	private int number;
 	private int status;
 	private InetAddress ip;
+	private static int length;
 	
 	public Friends(String name, int number, int status, InetAddress ip) {
 		this.name = name;
@@ -14,6 +15,14 @@ public class Friends {
 		this.ip = ip;
 	}
 	
+	protected static int getLength() {
+		return length;
+	}
+
+	protected static void setLength(int length) {
+		Friends.length = length;
+	}
+
 	public String getName() {
 		return name;
 	}

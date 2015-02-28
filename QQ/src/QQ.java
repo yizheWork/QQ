@@ -4,6 +4,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 
 /**
 * 属性：name(String)姓名、number(int)QQ号码、status(0在线、1隐身、2离线)状态、
@@ -27,11 +28,14 @@ import java.net.Socket;
 *
 */
 public class QQ {
-	private String name;
-	private int number;
-	private int status;
-	private Friends []friends;
-	private static final int THREADPOOLSIZE = 2;  
+	private static String name;
+	private static int number;
+	private static int status;
+	private static Friends []friends = new Friends[300];
+	private static final int THREADPOOLSIZE = 2;
+	static int friNum=0;
+	 static UILogin login;
+	 static UIFriends UIfr;
 	public QQ(String name, int number, int status, Friends[] friends) {
 		this.name = name;
 		this.number = number;
@@ -40,7 +44,7 @@ public class QQ {
 	}
 	
 	public static void main(String[] args)throws IOException{  
-	        final ServerSocket server = new ServerSocket(8888);  	          
+	        final ServerSocket server = new ServerSocket(6666);  	          
 	        for(int i=0;i<THREADPOOLSIZE;i++){  
 	            Thread thread = new Thread(){  
 	                public void run(){  
@@ -58,6 +62,8 @@ public class QQ {
 	            }; 
 	            thread.start();  
 	        }  
+	       login = new UILogin();
+	       login.setVisible(true);
 	    }  
 		
 	protected static void execute(Socket client) {
@@ -69,10 +75,12 @@ public class QQ {
 				if(inmsg!=null){
 				if(infIn(inmsg)==-1)
 					System.out.println("Error in infIn");
+				break;
 				}
 				if(inmsg.getType()==6){
 					break;
 				}
+				if(ois.readByte()!=0)
 				inmsg = (Msg) ois.readObject();
 			}
 			ois.close();
@@ -84,10 +92,11 @@ public class QQ {
 			}
 		}
 
-	private static int infIn(Msg msg)
+	static int infIn(Msg msg)
 	{
 		switch (msg.getType())
 		{
+			case 0:return showSta(msg);
 			case 1:return showMsg(msg);
 			case 2:return showSta(msg);
 			case 4:return showAdd(msg);
@@ -96,7 +105,7 @@ public class QQ {
 		}
 	}
 	
-	private int infOut(Msg msg)
+	static int infOut(Msg msg)
 	{
 		InetAddress ip = getIp(msg.getReceiver());
 		try {
@@ -112,8 +121,14 @@ public class QQ {
 			return -1;
 		}
 		}
-	private InetAddress getIp(int receiver) {
-		// TODO Auto-generated method stub
+	private static InetAddress getIp(int receiver) {
+		if(receiver == 0)
+			try {
+				return InetAddress.getByName("localhost");
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		return null;
 	}
 
@@ -138,8 +153,45 @@ public class QQ {
 		}
 	private static int showSta(Msg msg) {
 		// TODO Auto-generated method stub
+		if(msg.getType()==0){
+		System.out.println("登陆状态："+msg.getContent());
+		if(msg.getContent().matches("on")){
+			login.close();
+			QQ.number=msg.getReceiver();
+		}
+		}
+		else{
+			System.out.println(msg.getContent());
+			if(msg.getContent().compareTo("END")==0){
+				UIfr = new UIFriends(QQ.getName(),QQ.getNumber(),(QQ.getStatus()==0?"on":"hidden"),friends);
+				UIfr.setVisible(true);
+				
+			}else{
+			String []content = msg.getContent().split("\\|");
+			try {
+				Friends temp = new Friends(content[1],Integer.parseInt(content[0]),(content[2].equals("on")?0:2),InetAddress.getByName(content[3].substring(1, content[3].length())));
+				QQ.addFriends(temp);
+			} catch (NumberFormatException e) {
+				e.printStackTrace();
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			}
+			
+		}
+			}
 		return 0;
 		
+	}
+	private static void addFriends(Friends fri){
+		//Friends[] old = QQ.getFriends();
+		//int i=0;
+		friends[friNum]=fri;
+		//UIfr.add(fri);
+		//UIfr.repaint();
+		friNum++;
+		
+		//QQ.setFriends(old);
+		//return old;
 	}
 	private static int showDelete(Msg msg) {
 		// TODO Auto-generated method stub
@@ -152,5 +204,37 @@ public class QQ {
 	private static int showMsg(Msg msg) {
 		// TODO Auto-generated method stub
 		return 0;
+	}
+
+	protected static String getName() {
+		return name;
+	}
+
+	protected void setName(String name) {
+		this.name = name;
+	}
+
+	protected static int getNumber() {
+		return number;
+	}
+
+	protected void setNumber(int number) {
+		this.number = number;
+	}
+
+	protected static int getStatus() {
+		return status;
+	}
+
+	protected void setStatus(int status) {
+		this.status = status;
+	}
+
+	protected static Friends[] getFriends() {
+		return friends;
+	}
+
+	protected static void setFriends(Friends[] friends) {
+		QQ.friends = friends;
 	}
 }

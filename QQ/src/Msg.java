@@ -1,3 +1,5 @@
+import java.io.Serializable;
+
 /**
    Msg类设计：
  
@@ -10,7 +12,7 @@
 				 删除好友=5，消息体：QQ
 	接受者=0 代表服务器；
 **/
-public class Msg {
+public class Msg implements Serializable{
 	private int sender;
 	private int receiver;
 	private int type;
@@ -21,6 +23,9 @@ public class Msg {
 		this.receiver = receiver;
 		this.type = type;
 		this.content = content;
+	}
+	public String toString(){
+		return sender+receiver+type+content;
 	}
 	public int getSender() {
 		return sender;

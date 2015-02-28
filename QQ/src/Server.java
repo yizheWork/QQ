@@ -59,13 +59,13 @@ public class Server {
             System.out.println("找不到MySQL驱动!");
             e1.printStackTrace();
         }       
-        String url="jdbc:mysql://localhost:3306/mysql";     
+        String url="jdbc:mysql://localhost:3306/Server";     
         try {
             conn = DriverManager.getConnection(url,    "root","workhard");
              stmt= conn.createStatement(); 
             System.out.print("成功连接到数据库！");
-            stmt.close();
-            conn.close();
+            //stmt.close();
+            //conn.close();
         } catch (SQLException e){
             e.printStackTrace();
         }
@@ -77,34 +77,49 @@ public class Server {
 		case "info": sql = "select * from User where QQ ="+target; 
 					try {
 							ResultSet rs = stmt.executeQuery(sql);
+							rs.next();
 							pass = rs.getString(6);
 							sta = rs.getString(3);
 							name = rs.getString(2);
-							info = target+name+sta;
+							info = target+"|"+name+"|"+sta+"|";
 							rs.close();
 							return info;
 						}
 					catch (SQLException e) {
 						e.printStackTrace();
 					}
-		case "pass": sql = "select pass from user where QQ ="+target;
+		case "pass": sql = "select pass from User where QQ ="+target;
 						try {
 							ResultSet rs = stmt.executeQuery(sql);
-							pass = rs.getString(6);
+							rs.next();
+							pass = rs.getString(1);
 							rs.close();
 							return pass;
 						} catch (SQLException e) {	
 							e.printStackTrace();
 						}
-		case "sta": sql = "select sta from User where QQ ="+target;
+		case "sta": sql = "select staus from User where QQ ="+target;
 						try {
 							ResultSet rs = stmt.executeQuery(sql);
-							sta = rs.getString(3);
+							rs.next();
+							sta = rs.getString(1);
+							//System.out.println(sta);
 							rs.close();
 							return sta;
 						} catch (SQLException e) {				
 							e.printStackTrace();
 						}
+		case "fri": sql = "select friends from User where QQ ="+target;
+		try {
+			ResultSet rs = stmt.executeQuery(sql);
+			rs.next();
+			sta = rs.getString(1);
+			//System.out.println(sta);
+			rs.close();
+			return sta;
+		} catch (SQLException e) {				
+			e.printStackTrace();
+		}
 		default:return null;
 		}
 	}
@@ -123,7 +138,8 @@ public class Server {
 		try {
 			sql = "select IP from User where QQ="+content;
 			ResultSet rs = stmt.executeQuery(sql);
-			IP = rs.getString(4);
+			rs.next();
+			IP = rs.getString(1);
 			ip=InetAddress.getByName(IP);
 			rs.close();
 			return ip;
@@ -137,17 +153,17 @@ public class Server {
 		PreparedStatement pst;
 		switch(type){
 		case "sta": 
-			 sql = "update User set sta=? where QQ=?";
+			 sql = "update User set staus=? where QQ=?";
 			try {
 				pst = conn.prepareStatement(sql);
 				pst.setString(1,content);
 		      pst.setInt(2,target);
 		      pst.executeUpdate();
 		      pst.close();
-		      if(pst.isCloseOnCompletion())
+		      //if(pst.isCloseOnCompletion())
+		    	  //return 0;
+		      //else 
 		    	  return 0;
-		      else 
-		    	  return -1;
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -174,6 +190,7 @@ public class Server {
 			try {
 				sql = "select friends from User where QQ="+target;
 				ResultSet rs = stmt.executeQuery(sql);
+				rs.next();
 				String friends = rs.getString(4);
 				rs.close();
 				sql = "update User set friends=? where QQ=?";
@@ -198,15 +215,19 @@ public class Server {
 		ObjectInputStream ois;
 		try {	
 		ois = new ObjectInputStream(client.getInputStream());
-		Msg inmsg = (Msg) ois.readObject();
+		//System.out.println(ois.readObject().toString());
+		Msg inmsg = (Msg)ois.readObject();
+		System.out.println(inmsg.toString());
 		while(true){
 			if(inmsg!=null){
 			if(infIn(inmsg)==-1)
 				System.out.println("Error in infIn");
+				break;
 			}
 			if(inmsg.getType()==6){
 				break;
 			}
+			if(ois.available()!=0)
 			inmsg = (Msg) ois.readObject();
 		}
 		ois.close();
@@ -233,7 +254,7 @@ public class Server {
 	{
 		InetAddress ip = getIp(msg.getReceiver());
 		try {
-			Socket s = new Socket(ip,8888);
+			Socket s = new Socket(ip,6666);
 			ObjectOutputStream out = new ObjectOutputStream(s.getOutputStream());
 			out.writeObject(msg);
 			out.flush();
@@ -247,7 +268,16 @@ public class Server {
 		}
 	
 
-
+	private static void pushInf(int num){
+		String content = dbGet(num,"info");
+		InetAddress ip =getIp(num);
+		if(infOut(new Msg(0,num,2,content+ip))==-1){
+			System.out.println("推送"+num+"失败");
+		}
+		else System.out.println(num+content+ip);
+	}
+		
+		
 	private static int pushDelete(Msg msg) {
 		if (infOut(new Msg(0,msg.getSender(),5,msg.getContent()))==-1)
 			return -1;
@@ -287,14 +317,25 @@ public class Server {
 	}
 	
 	private static int changeSta(Msg msg) {
-		switch (msg.getContent())
-		{
+		switch (msg.getContent().substring(0, 2))
+		{			
 		case "on":if(dbGet(msg.getSender(),"sta")=="hidden")
 						return login(msg.getSender());
 					 else 
-						return login(msg.getSender(),msg.getContent());
-		case "off":return logout(msg.getSender());
-		case "hidden":if(dbGet(msg.getSender(),"sta")=="on")
+						if(0==login(msg.getSender(),msg.getContent())){
+							//infOut(new Msg(0,msg.getSender(),0,"on"));
+							String friends = dbGet(msg.getSender(),"fri");
+							String []fri= friends.split("\\|");
+							for(int i=1;i<fri.length;i++){
+								//System.out.println("**"+fri[i]);
+								pushInf(Integer.parseInt(fri[i]));
+							}
+							infOut(new Msg(0,msg.getSender(),2,"END"));
+							System.out.println("END out!");
+							return 0;
+						};
+		case "of":return logout(msg.getSender());
+		case "hi":if(dbGet(msg.getSender(),"sta")=="on")
 						  	return hidden(msg.getSender());
 						  else 
 							return hidden(msg.getSender(),msg.getContent());
@@ -336,8 +377,9 @@ public class Server {
 		if(verify(sender,pass.substring(2, pass.length()))){
 			if(dbSet(sender,"sta","on")==-1)
 				return -1;
-			if(infOut(new Msg(0,sender,0,"on"))==-1)
+			else if(infOut(new Msg(0,sender,0,"on"))==-1)
 				return -1;
+			else return 0;
 		}
 		else if(infOut(new Msg(0,sender,0,"failure"))==-1)
 			return -1;
