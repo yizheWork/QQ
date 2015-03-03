@@ -52,7 +52,6 @@ public class QQ {
 	                    while(true){  
 	                        try {  
 	                            Socket client = server.accept();  
-	                            System.out.println("收到链接");  
 	                            QQ.execute(client);  
 	                        } catch (IOException e) {  
 	                            e.printStackTrace();  
@@ -126,13 +125,10 @@ public class QQ {
 			try {
 				return InetAddress.getByName("localhost");
 			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		return null;
 	}
-
-	//private int infCenter(Msg msg){return 0;}
 	private int changeStatus(String sta){
 		if(infOut(new Msg(number,0,0,sta))==0)
 			return 0;
@@ -152,16 +148,13 @@ public class QQ {
 			return -1;
 		}
 	private static int showSta(Msg msg) {
-		// TODO Auto-generated method stub
 		if(msg.getType()==0){
-		System.out.println("登陆状态："+msg.getContent());
 		if(msg.getContent().matches("on")){
 			login.close();
 			QQ.number=msg.getReceiver();
 		}
 		}
 		else{
-			System.out.println(msg.getContent());
 			if(msg.getContent().compareTo("END")==0){
 				UIfr = new UIFriends(QQ.getName(),QQ.getNumber(),(QQ.getStatus()==0?"on":"hidden"),friends);
 				UIfr.setVisible(true);
@@ -182,16 +175,9 @@ public class QQ {
 		return 0;
 		
 	}
-	private static void addFriends(Friends fri){
-		//Friends[] old = QQ.getFriends();
-		//int i=0;
-		friends[friNum]=fri;
-		//UIfr.add(fri);
-		//UIfr.repaint();
+	private static void addFriends(Friends fri){	
+		friends[friNum]=fri;		
 		friNum++;
-		
-		//QQ.setFriends(old);
-		//return old;
 	}
 	private static int showDelete(Msg msg) {
 		// TODO Auto-generated method stub
@@ -202,7 +188,8 @@ public class QQ {
 		return 0;
 	}
 	private static int showMsg(Msg msg) {
-		// TODO Auto-generated method stub
+		UIChat chat = new UIChat(msg.getSender(),msg.getContent());
+		chat.setVisible(true);
 		return 0;
 	}
 

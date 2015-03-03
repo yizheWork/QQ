@@ -5,6 +5,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -21,10 +23,19 @@ public class UIChat extends JFrame{
 	final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
 	private int num;
 	private String name;
-	public UIChat(){
+
+	public UIChat(final int num,String name){
+		this.name = name;
+		this.num = num;
 		setTitle("对话");
 		setSize(500,600);
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		addWindowListener(new WindowAdapter() { 		  
+			public void windowClosing(WindowEvent e) {  
+			super.windowClosing(e);  
+			UIChat.this.dispose();
+			 }  	  
+			});   
 		this.setVisible(true);
 		
 	   GridBagLayout layout = new GridBagLayout();  
@@ -99,12 +110,8 @@ public class UIChat extends JFrame{
 	public void ear(Msg msg){
 		show.append(msg.getSender()+" "+df.format(new Date())+"\n"+msg.getContent()+"\n");
 	}
-	public void UIChat(int num,String name){
-		this.name = name;
-		this.num = num;
-	}
-	public static void main(String[] args){
-		UIChat chat = new UIChat();
-		chat.setVisible(true);
-	}
+	//public static void main(String[] args){
+		//UIChat chat = new UIChat();
+		//chat.setVisible(true);
+	//}
 }

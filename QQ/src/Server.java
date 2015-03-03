@@ -42,7 +42,7 @@ public class Server {
                     while(true){  
                         try {  
                             Socket client = server.accept();  
-                            System.out.println("收到链接");  
+                            //System.out.println("收到链接");  
                             Server.execute(client);  
                         } catch (IOException e) {  
                             e.printStackTrace();  
@@ -54,7 +54,7 @@ public class Server {
         }  
         try{
             Class.forName("com.mysql.jdbc.Driver");
-            System.out.println("成功加载MySQL驱动！");
+            //System.out.println("成功加载MySQL驱动！");
         }catch(ClassNotFoundException e1){
             System.out.println("找不到MySQL驱动!");
             e1.printStackTrace();
@@ -63,9 +63,6 @@ public class Server {
         try {
             conn = DriverManager.getConnection(url,    "root","workhard");
              stmt= conn.createStatement(); 
-            System.out.print("成功连接到数据库！");
-            //stmt.close();
-            //conn.close();
         } catch (SQLException e){
             e.printStackTrace();
         }
@@ -103,7 +100,6 @@ public class Server {
 							ResultSet rs = stmt.executeQuery(sql);
 							rs.next();
 							sta = rs.getString(1);
-							//System.out.println(sta);
 							rs.close();
 							return sta;
 						} catch (SQLException e) {				
@@ -114,7 +110,6 @@ public class Server {
 			ResultSet rs = stmt.executeQuery(sql);
 			rs.next();
 			sta = rs.getString(1);
-			//System.out.println(sta);
 			rs.close();
 			return sta;
 		} catch (SQLException e) {				
@@ -160,9 +155,6 @@ public class Server {
 		      pst.setInt(2,target);
 		      pst.executeUpdate();
 		      pst.close();
-		      //if(pst.isCloseOnCompletion())
-		    	  //return 0;
-		      //else 
 		    	  return 0;
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -215,9 +207,7 @@ public class Server {
 		ObjectInputStream ois;
 		try {	
 		ois = new ObjectInputStream(client.getInputStream());
-		//System.out.println(ois.readObject().toString());
 		Msg inmsg = (Msg)ois.readObject();
-		System.out.println(inmsg.toString());
 		while(true){
 			if(inmsg!=null){
 			if(infIn(inmsg)==-1)
@@ -274,7 +264,6 @@ public class Server {
 		if(infOut(new Msg(0,num,2,content+ip))==-1){
 			System.out.println("推送"+num+"失败");
 		}
-		else System.out.println(num+content+ip);
 	}
 		
 		
@@ -322,16 +311,13 @@ public class Server {
 		case "on":if(dbGet(msg.getSender(),"sta")=="hidden")
 						return login(msg.getSender());
 					 else 
-						if(0==login(msg.getSender(),msg.getContent())){
-							//infOut(new Msg(0,msg.getSender(),0,"on"));
+						if(0==login(msg.getSender(),msg.getContent())){							
 							String friends = dbGet(msg.getSender(),"fri");
 							String []fri= friends.split("\\|");
-							for(int i=1;i<fri.length;i++){
-								//System.out.println("**"+fri[i]);
+							for(int i=1;i<fri.length;i++){							
 								pushInf(Integer.parseInt(fri[i]));
 							}
-							infOut(new Msg(0,msg.getSender(),2,"END"));
-							System.out.println("END out!");
+							infOut(new Msg(0,msg.getSender(),2,"END"));							
 							return 0;
 						};
 		case "of":return logout(msg.getSender());

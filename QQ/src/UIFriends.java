@@ -114,16 +114,31 @@ public class UIFriends extends JFrame{
 		layout.setConstraints(search, s);
 		final JMenuItem chat = new JMenuItem();
 		final JMenuItem delete = new JMenuItem();
-		final String tempName = null;
-		
+		//final String tempName = null;
+		chat.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent arg0) {
+				String name = friendsJL.getSelectedValue().toString();
+				int num=Integer.parseInt(name.substring(name.lastIndexOf(" ")+1,name.length()));
+				QQ.infIn(new Msg(num,QQ.getNumber(),1,name.substring(0, name.indexOf(" "))));
+				
+			}
+			
+		});
+		delete.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent arg0) {
+				String name = friendsJL.getSelectedValue().toString();
+				int num=Integer.parseInt(name.substring(name.lastIndexOf(" ")+1,name.length()));
+				QQ.infIn(new Msg(num,QQ.getNumber(),5,""+num));
+			}
+			
+		});
 		friendsJL.addMouseListener(new MouseListener(){
 			public void mouseClicked(MouseEvent evt) {
 				if (evt.getClickCount() == 2)
 				   {
 				      String name = friendsJL.getSelectedValue().toString();
-				      int num=Integer.parseInt(name.substring(tempName.lastIndexOf(" "),-1));
-				      QQ.infIn(new Msg(num,QQ.getNumber(),1,null));
-				      //System.out.println("Chat with "+tempName);
+				      int num=Integer.parseInt(name.substring(name.lastIndexOf(" ")+1,name.length()));
+				      QQ.infIn(new Msg(num,QQ.getNumber(),1,name.substring(0, name.indexOf(" "))));
 				   }
 			}
 
@@ -142,27 +157,18 @@ public class UIFriends extends JFrame{
 			@Override
 			public void mousePressed(MouseEvent evt) {
 				JPopupMenu menu = new JPopupMenu();
-				String name = friendsJL.getSelectedValue().toString();
-			   final int num=Integer.parseInt(name.substring(tempName.lastIndexOf(" "),-1));
+				String name=null;
+				if(friendsJL.getSelectedValue() == null)
+					return;
+				 name= friendsJL.getSelectedValue().toString();				
+			   int num=Integer.parseInt(name.substring(name.lastIndexOf(" ")+1,name.length()));
 				chat.setText("发起会话");
 				delete.setText("删除好友");
 				menu.add(chat);
 				menu.add(delete);
 				if(evt.getButton() == 3 && friendsJL.getSelectedValue()!=null)
                  menu.show(friendsJL,evt.getX(),evt.getY());
-				chat.addActionListener(new ActionListener(){
-					public void actionPerformed(ActionEvent arg0) {
-						QQ.infIn(new Msg(num,QQ.getNumber(),1,null));
-						
-					}
-					
-				});
-				delete.addActionListener(new ActionListener(){
-					public void actionPerformed(ActionEvent arg0) {
-						QQ.infIn(new Msg(num,QQ.getNumber(),5,""+num));
-					}
-					
-				});
+			
 			}
 
 			@Override
